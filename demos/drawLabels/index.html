@@ -1,0 +1,103 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>Draw Labels</title>
+  <!--
+   | Copyright 2022 Esri
+   |
+   | Licensed under the Apache License, Version 2.0 (the "License");
+   | you may not use this file except in compliance with the License.
+   | You may obtain a copy of the License at
+   |
+   |    http://www.apache.org/licenses/LICENSE-2.0
+   |
+   | Unless required by applicable law or agreed to in writing, software
+   | distributed under the License is distributed on an "AS IS" BASIS,
+   | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   | See the License for the specific language governing permissions and
+   | limitations under the License.
+  -->
+  <script src="https://requirejs.org/docs/release/2.3.6/minified/require.js"></script>
+</head>
+<body>
+
+  <script>
+    let exports = {};
+    require.config({
+      paths: {
+        "dist": "../../dist"
+      }
+    });
+    require(["dist/jspdf", "dist/pdf", "dist/label", "dist/grid"],
+      (jspdf, pdf, label, grid) => {
+        // Start the PDF document
+        const pdfOptions = {
+          format: "letter",
+          orientation: "portrait",
+          unit: "in"
+        };
+        const doc = new jspdf.jsPDF({
+          putOnlyUsedFonts: true,
+          ...pdfOptions
+        });
+
+        // Set the doc up for labels
+        label.initPDFLabelDoc(doc, "../../dist/")
+        .then(
+          doc => {
+            const labelFormat = label.getLabelFormat(doc, "*60");
+            label.drawLabelGuidelines(
+              doc,
+              labelFormat.labelSpec,
+              { // label boundaries
+                color: "#7f7fff", // red 50%, green 50%, blue 100%
+                width: 0.01
+              }, {  // measurement guidelines
+                 color: "#ff7f7f", // red 100%, green 50%, blue 50%
+                 width: 0.01,
+                 tickLength: 0.075,
+                 tickInterval: 1
+              }
+            );
+
+            const labels = [[
+              "line 1", "line 2", "line 3", "line 4"
+            ], [
+              "line a", "line b", "line c", "line d", "line e"
+            ], [
+              "line A", "line B", "line C", "line D", "line E", "line F"
+            ], [
+              "line 1", "line 2", "line 3", "line 4"
+            ], [
+              "line a", "line b", "line c", "line d", "line e"
+            ], [
+              "line A", "line B", "line C", "line D", "line E", "line F"
+            ], [
+              "line 1", "line 2", "line 3", "line 4"
+            ], [
+              "line a", "line b", "line c", "line d", "line e"
+            ], [
+              "line A", "line B", "line C", "line D", "line E", "line F"
+            ], [
+              "line 1", "line 2", "line 3", "line 4"
+            ], [
+              "line a", "line b", "line c", "line d", "line e"
+            ], [
+              "line A", "line B", "line C", "line D", "line E", "line F"
+            ]];
+            label.addLabelsToDoc(doc, labels, labelFormat.labelSpec, 1, pdfOptions)
+            .then(
+              () => {
+                doc.save("pdf.pdf");
+              }
+            );
+          },
+          (error) => {
+            console.log(JSON.stringify(error,null, 2));
+            reject(error);
+          }
+        );
+      }
+    );
+  </script>
+</body>

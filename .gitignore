@@ -1,0 +1,28 @@
+# Garbage
+.DS_Store
+
+# Built files
+dist
+.zip
+src/*.js
+!src/jspdf.js
+!src/tslib.js
+
+# Dependency directories
+node_modules/
+
+# Tools, notes, outputs
+__*.*
+__*
+.vscode/
+
+# Temporary build products
+coverage/
+docs/
+test/**/*.d.ts
+test/**/*.js
+
+# Configuration
+!test/.eslintrc.js
+!test/karma.conf.js
+
