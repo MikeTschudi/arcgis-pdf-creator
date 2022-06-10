@@ -68,11 +68,11 @@ export declare function drawHorizontallMeasurementTicks(doc: jspdf.jsPDF, yTopTi
  * Draws a measurement grid useful for checking scaling and for adjusting offsets.
  *
  * @param {object} doc jsPDF document
- * @param {object} boundingBox Rectangular box of grid
+ * @param {object} pageDimensions Rectangular box of grid
  * @param {object} lineProperties Drawing properties for grid lines
  * @note Note that grid lines will not appear if outside of printer's page print area
  */
-export declare function drawMeasurementLines(doc: jspdf.jsPDF, boundingBox: pdf.IPageDimensions, lineProperties: IMeasurementLineProperties): void;
+export declare function drawMeasurementLines(doc: jspdf.jsPDF, pageDimensions: pdf.IPageDimensions, lineProperties: IMeasurementLineProperties): void;
 /**
  * Draws a line.
  *

@@ -113,13 +113,13 @@ export function drawHorizontallMeasurementTicks(
  * Draws a measurement grid useful for checking scaling and for adjusting offsets.
  *
  * @param {object} doc jsPDF document
- * @param {object} boundingBox Rectangular box of grid
+ * @param {object} pageDimensions Rectangular box of grid
  * @param {object} lineProperties Drawing properties for grid lines
  * @note Note that grid lines will not appear if outside of printer's page print area
  */
 export function drawMeasurementLines(
   doc: jspdf.jsPDF,
-  boundingBox: pdf.IPageDimensions,
+  pageDimensions: pdf.IPageDimensions,
   lineProperties: IMeasurementLineProperties
 ): void {
   const savedLineProperties = setLineProperties(doc, lineProperties);
@@ -128,25 +128,29 @@ export function drawMeasurementLines(
   const tickInterval = lineProperties.tickInterval === undefined ? 1 : lineProperties.tickInterval;
 
   // Draw box showing margins
-  doc.rect(boundingBox.leftMargin, boundingBox.topMargin,
-    boundingBox.width - boundingBox.rightMargin,
-    boundingBox.height - boundingBox.bottomMargin);
+  doc.rect(pageDimensions.leftMargin, pageDimensions.topMargin,
+    pageDimensions.width - pageDimensions.leftMargin - pageDimensions.rightMargin,
+    pageDimensions.height - pageDimensions.topMargin - pageDimensions.bottomMargin);
 
   // Draw tick marks along horizontal margin lines
-  drawVerticalMeasurementTicks(doc, boundingBox.leftMargin, boundingBox.width + boundingBox.leftMargin,
-    boundingBox.topMargin, // first tick
-    tickLength, tickInterval);
-  drawVerticalMeasurementTicks(doc, boundingBox.leftMargin, boundingBox.width + boundingBox.leftMargin,
-    boundingBox.height + boundingBox.topMargin, // first tick
-    -tickLength, tickInterval);
+  drawVerticalMeasurementTicks(doc,
+    pageDimensions.leftMargin, // first (left) tick
+    pageDimensions.width - pageDimensions.rightMargin, // tick cutoff
+    pageDimensions.topMargin, tickLength, tickInterval); // tick properties
+  drawVerticalMeasurementTicks(doc,
+    pageDimensions.leftMargin, // first (left) tick
+    pageDimensions.width - pageDimensions.rightMargin, // tick cutoff
+    pageDimensions.height + pageDimensions.topMargin, -tickLength, tickInterval); // tick properties
 
   // Draw tick marks along vertical margin lines
-  drawHorizontallMeasurementTicks(doc, boundingBox.topMargin, boundingBox.height + boundingBox.topMargin,
-    boundingBox.leftMargin, // first tick
-    tickLength, tickInterval);
-  drawHorizontallMeasurementTicks(doc, boundingBox.topMargin, boundingBox.height + boundingBox.topMargin,
-    boundingBox.leftMargin + boundingBox.width, // first tick
-    -tickLength, tickInterval);
+  drawHorizontallMeasurementTicks(doc,
+    pageDimensions.topMargin, // first (top) tick
+    pageDimensions.height - pageDimensions.bottomMargin, // tick cutoff
+    pageDimensions.leftMargin, tickLength, tickInterval); // tick properties
+  drawHorizontallMeasurementTicks(doc,
+    pageDimensions.topMargin, // first (top) tick
+    pageDimensions.height - pageDimensions.bottomMargin, // tick cutoff
+    pageDimensions.leftMargin + pageDimensions.width, -tickLength, tickInterval); // tick properties
 
   setLineProperties(doc, savedLineProperties);
 }
