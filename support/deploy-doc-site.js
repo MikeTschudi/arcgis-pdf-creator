@@ -4,7 +4,7 @@ ghpages.publish(
   "docs",
   {
     branch: "gh-pages",
-    repo: "https://github.com/ArcGIS/solutions-libraries.git"
+    repo: "https://github.com/MikeTschudi/arcgis-pdf-creator.git"
   },
   function(err) {
     if (err) {
