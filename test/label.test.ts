@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as grid from "../src/grid";
 import * as jspdf from "jspdf";
 import * as label from "../src/label";
 
@@ -83,10 +84,84 @@ describe("Module `label`: label-generating PDF routines", () => {
 
   });
 
+  describe("getLabelFormat", () => {
+
+    it("returns null if the doc does not have any label formats", () => {
+      const doc = {
+      } as label.IjsPDFExt;
+
+      const actual = label.getLabelFormat(doc, "xx");
+
+      expect(actual).toBeNull();
+    });
+
+    it("returns null if the doc does not have the specified label format", () => {
+      const doc = {
+        labelFormats: gLabelFormats
+      } as label.IjsPDFExt;
+
+      const actual = label.getLabelFormat(doc, "X");
+
+      expect(actual).toBeNull();
+    });
+
+    it("returns a  specified label format", () => {
+      const doc = {
+        labelFormats: gLabelFormats
+      } as label.IjsPDFExt;
+
+      const actual = label.getLabelFormat(doc, "C");
+
+      expect(actual).toEqual(gLabelFormats[2]);
+    });
+
+  });
+
+  describe("drawLabelGuidelines", () => {
+
+    it("doesn't draw lines if no specs supplied", () => {
+      const doc = {
+      } as jspdf.jsPDF;
+      const labelSpec = gLabelFormats[0].labelSpec;
+
+      const drawGridBoxesSpy = spyOn(grid, "drawGridBoxes");
+      const drawMeasurementLinesSpy = spyOn(grid, "drawMeasurementLines");
+
+      label.drawLabelGuidelines(doc, labelSpec);
+
+      expect(drawGridBoxesSpy.calls.count()).toEqual(0);
+      expect(drawMeasurementLinesSpy.calls.count()).toEqual(0);
+    });
+
+    it("draw specified lines", () => {
+      const doc = {
+      } as jspdf.jsPDF;
+      const labelSpec = gLabelFormats[0].labelSpec;
+      const labelBoundaryLinesProperties = {
+        color: "#00ffff",
+        width: 1.2
+      } as grid.ILineProperties;
+      const measurementLinesProperties = {
+        tickLength: 1.3,
+        tickInterval: 1.4
+      } as grid.IMeasurementLineProperties;
+
+      const drawGridBoxesSpy = spyOn(grid, "drawGridBoxes");
+      const drawMeasurementLinesSpy = spyOn(grid, "drawMeasurementLines");
+
+      label.drawLabelGuidelines(doc, labelSpec,
+        labelBoundaryLinesProperties, measurementLinesProperties);
+
+      expect(drawGridBoxesSpy.calls.count()).toEqual(1);
+      expect(drawMeasurementLinesSpy.calls.count()).toEqual(1);
+    });
+
+  });
+
   describe("getTextWidth", () => {
 
     it("handles uninitialized doc", () => {
-      const doc: label.IjsPDFExt = {
+      const doc = {
       } as label.IjsPDFExt;
 
       const actual = label.getAvailableLabelFormats(doc);
@@ -95,7 +170,7 @@ describe("Module `label`: label-generating PDF routines", () => {
     });
 
     it("handles initialized doc without label formats", () => {
-      const doc: label.IjsPDFExt = {
+      const doc = {
         labelFormats: [] as label.ILabel[]
       } as label.IjsPDFExt;
 
@@ -105,7 +180,7 @@ describe("Module `label`: label-generating PDF routines", () => {
     });
 
     it("handles initialized doc with label formats", () => {
-      const doc: label.IjsPDFExt = {
+      const doc = {
         labelFormats: gLabelFormats
       } as label.IjsPDFExt;
 
