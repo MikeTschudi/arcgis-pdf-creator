@@ -15,14 +15,32 @@
  */
 import * as jspdf from "jspdf";
 /**
- * Properties describing page dimensions.
+ * Properties describing page dimensions in doc units.
  */
 export interface IPageDimensions {
+    /**
+     * Full width of the page.
+     */
     width: number;
+    /**
+     * Full height of the page.
+     */
     height: number;
+    /**
+     * Left-side offset to print area of page.
+     */
     leftMargin: number;
+    /**
+     * Right-side offset to print area of page.
+     */
     rightMargin: number;
+    /**
+     * Top-side offset to print area of page.
+     */
     topMargin: number;
+    /**
+     * Bottom-side offset to print area of page.
+     */
     bottomMargin: number;
 }
 /**
@@ -34,30 +52,49 @@ export interface IPDFOptions {
     unit?: "pt" | "px" | "in" | "mm" | "cm" | "ex" | "em" | "pc";
 }
 /**
- * Creates a jsPDF `doc` object.
- *
- * @param lang Locale such as "en" or "en-gb"
- * @param options Options for creating the `doc` object such as page size, orientation, and measurement units;
- * defaults to "letter", "portrait", "in"ches
- * @return Promise resolving to the created jsPDF `doc` object
- */
-export declare function startPDFDoc(lang?: string, options?: IPDFOptions): Promise<jspdf.jsPDF>;
-/**
  * Loads the font file for a language if it is not already loaded.
  *
  * @param doc jsPDF `doc` object
+ * @param dataPath Path to the library's data files
  * @param lang Locale such as "en" or "en-gb"
- * @return Promise resolving to the updated `doc` input
+ * @returns Promise resolving to the updated `doc` input
  */
-export declare function loadLanguageFontFile(doc: jspdf.jsPDF, lang: string): Promise<jspdf.jsPDF>;
+export declare function loadLanguageFontFile(doc: jspdf.jsPDF, dataPath: string, lang?: string): Promise<jspdf.jsPDF>;
 /**
  * Converts a locale into a jsPDF language code
  *
  * @param lang Locale such as "en" or "en-gb"
- * @return jsPDF_lang_code jsPDF language code such as "en" or "en-GB", mapping AGO locales "it-it" & "pt-pt"
+ * @returns jsPDF_lang_code jsPDF language code such as "en" or "en-GB", mapping AGO locales "it-it" & "pt-pt"
  * into "it" & "pt", respectively, to match jsPDF offering
+ * @private
  */
-export declare function convertLocaleToLanguageCode(lang: string): jsPDF_lang_code;
+export declare function convertLocaleToJsPDFLanguageCode(lang: string): jsPDF_lang_code;
+/**
+ * Returns the root of the filename supporting the specified locale.
+ *
+ * @param lang Locale such as "en" or "en-gb"
+ * @returns Language filename root, e.g., "0b7681dc140844ee9f409bdac249fbf0-japanese"
+ * @private
+ */
+export declare function getFontFilename(lang: string): string;
+/**
+ * Reports if the locale is considered a CJK locale.
+ *
+ * @param lang Locale such as "en", "en-gb", "cn-tw"
+ * @returns "true" if the locale is "ja", "ko", "zh-*"
+ * @private
+ */
+export declare function isCJK(lang: string): boolean;
+/**
+ * Sets the font and RTL for a locale.
+ *
+ * @param doc jsPDF `doc` object
+ * @param lang Locale such as "en" or "en-gb"
+ * @param fontName Name of font, e.g., "0b7681dc140844ee9f409bdac249fbf0-japanese"
+ * @note RTL is only set for Hebrew because jsPDF does not yet support Arabic
+ * @private
+ */
+export declare function setFont(doc: jspdf.jsPDF, lang: string, fontName: string): void;
 /**
  * Enumeration of putatively supported locales in jsPDF copied from jsPDF.
  */

@@ -28,8 +28,19 @@ export interface ILineProperties {
      */
     width?: number;
 }
+export interface IMeasurementLineProperties extends ILineProperties {
+    /**
+     * Length of each tick mark in doc units; defaults to 0.075.
+     */
+    tickLength?: number;
+    /**
+     * Gap between each tick mark in doc units; defaults to 1.
+     */
+    tickInterval?: number;
+}
 /**
  * Draws a grid of boxes with optional gaps between boxes.
+ *
  * @param {object} doc jsPDF document
  * @param {number} numAcross Number of boxes in each row
  * @param {number} numDown Number of boxes in each column
@@ -39,10 +50,12 @@ export interface ILineProperties {
  * @param {number} height Height of each box in doc units
  * @param {number} horizGap Gap in doc units between two boxes in the same row
  * @param {number} vertGap Gap in doc units between two boxes in the same column
+ * @param {object} lineProperties Drawing properties for grid lines
  */
 export declare function drawGridBoxes(doc: jspdf.jsPDF, numAcross: number, numDown: number, x0: number, y0: number, width: number, height: number, horizGap: number, vertGap: number, lineProperties: ILineProperties): void;
 /**
  * Draws a set of horizontal tick marks down the page.
+ *
  * @param {object} doc jsPDF document
  * @param {number} yTopTick Vertical offset in doc units to topmost tick mark
  * @param {number} yBottomCutoff Vertical offset in doc units from top of page beyond which no tick marks are to be drawn
@@ -53,18 +66,16 @@ export declare function drawGridBoxes(doc: jspdf.jsPDF, numAcross: number, numDo
 export declare function drawHorizontallMeasurementTicks(doc: jspdf.jsPDF, yTopTick: number, yBottomCutoff: number, xTickLeft: number, tickLength: number, tickInterval: number): void;
 /**
  * Draws a measurement grid useful for checking scaling and for adjusting offsets.
+ *
  * @param {object} doc jsPDF document
- * @param {object} config A collection of grid options: the page top, bottom, left, and right offsets,
- *        the page width and height
- * @param {string} gridLineColor Intensity of line's gray from "0.00" (solid black) to "1.00" (solid white)
- * @param {number} gridLineThickness Thickness of all grid lines in doc units
- * @param {number} tickLength Length of each tick mark in doc units
- * @param {number} tickInterval Gap between each tick mark in doc units
+ * @param {object} boundingBox Rectangular box of grid
+ * @param {object} lineProperties Drawing properties for grid lines
  * @note Note that grid lines will not appear if outside of printer's page print area
  */
-export declare function drawMeasurementLines(doc: jspdf.jsPDF, pageDimensions: pdf.IPageDimensions, lineProperties: ILineProperties, tickLength: number, tickInterval: number): void;
+export declare function drawMeasurementLines(doc: jspdf.jsPDF, boundingBox: pdf.IPageDimensions, lineProperties: IMeasurementLineProperties): void;
 /**
  * Draws a line.
+ *
  * @param {object} doc jsPDF document
  * @param {number} x0 Horizontal offset in doc units from left of page to start of line
  * @param {number} y0 Vertical offset in doc units from top of page to start of line
@@ -74,6 +85,7 @@ export declare function drawMeasurementLines(doc: jspdf.jsPDF, pageDimensions: p
 export declare function drawPDFLine(doc: jspdf.jsPDF, x0: number, y0: number, x1: number, y1: number): void;
 /**
  * Draws a set of vertical tick marks across the page.
+ *
  * @param {object} doc jsPDF document
  * @param {number} xLeftTick Horizontal offset in doc units to leftmost tick mark
  * @param {number} xRightCutoff Horizontal offset in doc units from left of page beyond which no tick marks are to be drawn
@@ -82,3 +94,12 @@ export declare function drawPDFLine(doc: jspdf.jsPDF, x0: number, y0: number, x1
  * @param {number} tickInterval Gap between each tick mark in doc units
  */
 export declare function drawVerticalMeasurementTicks(doc: jspdf.jsPDF, xLeftTick: number, xRightCutoff: number, yTickTop: number, tickLength: number, tickInterval: number): void;
+/**
+ * Sets line drawing properties.
+ *
+ * @param {object} doc jsPDF document
+ * @param {object} lineProperties Properties to apply
+ * @returns Properties in the doc before lineProperties was applied
+ * @private
+ */
+export declare function setLineProperties(doc: jspdf.jsPDF, lineProperties: ILineProperties): ILineProperties;
