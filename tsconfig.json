@@ -8,7 +8,7 @@
     "module": "umd",
     "moduleResolution": "node",
     "noImplicitAny": true,
-    "outDir": "dist",
+    "outDir": "src",
     "skipLibCheck": true,
     "sourceMap": false,
     "strict": true,

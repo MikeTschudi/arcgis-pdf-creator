@@ -7,6 +7,8 @@ call npm install
 
 call tsc -p ./tsconfig.json
 
+call mkdir dist 2>nul
+call copy src\*.js dist\
 call copy data\*.* dist\
 call copy node_modules\jspdf\dist\jspdf.umd.min.js dist\jspdf.js
 
