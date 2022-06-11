@@ -118,7 +118,7 @@ export declare type IAddLabelsToDocProgressCallback = (
  */
 percentDone: number) => void;
 /**
- * Add labels to a PDF doc.
+ * Add labels to a PDF doc, starting at the beginning of the current PDF doc page.
  *
  * @param {object} doc jsPDF document
  * @param labels Array of labels; each label consists of one or more line strings

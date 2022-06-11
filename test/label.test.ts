@@ -17,10 +17,55 @@
 import * as grid from "../src/grid";
 import * as jspdf from "jspdf";
 import * as label from "../src/label";
+const labelFormats = require('../data/labelFormats.json');
 
 //--------------------------------------------------------------------------------------------------------------------//
 
 describe("Module `label`: label-generating PDF routines", () => {
+
+  describe("addLabelsToDoc", () => {
+
+    it("doesn't draw if no labels are supplied", done => {
+      const fakeDoc = Object.assign({
+        addPage: (format: string, orientation: string) => {},
+        getFontSize: () => { return 1; },
+        getStringUnitWidth: (text: string) => { return text.length; },
+        setFontSize: (size: number) => {},
+        text: (text: string[], x: number, y: number) => {},
+        internal: {
+          scaleFactor: 1
+        }
+      });
+      const labels = [[
+        "abc",
+        "def"
+        ], [
+        "ghi",
+        "jkl"
+      ]];
+      const labelSpec = labelFormats[0].labelSpec;
+      const startingPageNum = 4;
+
+      const addPageSpy = spyOn(fakeDoc, "addPage");
+      const setFontSizeSpy = spyOn(fakeDoc, "setFontSize");
+      const textSpy = spyOn(fakeDoc, "text");
+
+      label.addLabelsToDoc(fakeDoc, labels, labelSpec, startingPageNum, {}, (pct) => { console.log(pct + "%"); })
+      .then(
+        (currentPageNum: number) => {
+          expect(currentPageNum).toEqual(4);
+          expect(addPageSpy.calls.count()).toEqual(0);
+          expect(setFontSizeSpy.calls.count()).toEqual(1);
+          expect(textSpy.calls.count()).toEqual(2);
+          done();
+        },
+        () => {
+          done.fail();
+        }
+      );
+    });
+
+  });
 
   describe("clipOverlongLines", () => {
 
@@ -36,8 +81,8 @@ describe("Module `label`: label-generating PDF routines", () => {
 
     it("handles line list that fits", () => {
       const fakeDoc = Object.assign({
-        getStringUnitWidth: (text: string) => { return text.length; },
         getFontSize: () => { return 1; },
+        getStringUnitWidth: (text: string) => { return text.length; },
         internal: {
           scaleFactor: 1
         }
@@ -60,8 +105,8 @@ describe("Module `label`: label-generating PDF routines", () => {
 
     it("handles list lines that are too wide", () => {
       const fakeDoc = Object.assign({
-        getStringUnitWidth: (text: string) => { return text.length; },
         getFontSize: () => { return 1; },
+        getStringUnitWidth: (text: string) => { return text.length; },
         internal: {
           scaleFactor: 1
         }
@@ -97,7 +142,7 @@ describe("Module `label`: label-generating PDF routines", () => {
 
     it("returns null if the doc does not have the specified label format", () => {
       const doc = {
-        labelFormats: gLabelFormats
+        labelFormats
       } as label.IjsPDFExt;
 
       const actual = label.getLabelFormat(doc, "X");
@@ -107,12 +152,12 @@ describe("Module `label`: label-generating PDF routines", () => {
 
     it("returns a  specified label format", () => {
       const doc = {
-        labelFormats: gLabelFormats
+        labelFormats
       } as label.IjsPDFExt;
 
-      const actual = label.getLabelFormat(doc, "C");
+      const actual = label.getLabelFormat(doc, "*62");
 
-      expect(actual).toEqual(gLabelFormats[2]);
+      expect(actual).toEqual(labelFormats[2]);
     });
 
   });
@@ -122,7 +167,7 @@ describe("Module `label`: label-generating PDF routines", () => {
     it("doesn't draw lines if no specs supplied", () => {
       const doc = {
       } as jspdf.jsPDF;
-      const labelSpec = gLabelFormats[0].labelSpec;
+      const labelSpec = labelFormats[0].labelSpec;
 
       const drawGridBoxesSpy = spyOn(grid, "drawGridBoxes");
       const drawMeasurementLinesSpy = spyOn(grid, "drawMeasurementLines");
@@ -136,7 +181,7 @@ describe("Module `label`: label-generating PDF routines", () => {
     it("draw specified lines", () => {
       const doc = {
       } as jspdf.jsPDF;
-      const labelSpec = gLabelFormats[0].labelSpec;
+      const labelSpec = labelFormats[0].labelSpec;
       const labelBoundaryLinesProperties = {
         color: "#00ffff",
         width: 1.2
@@ -181,10 +226,10 @@ describe("Module `label`: label-generating PDF routines", () => {
 
     it("handles initialized doc with label formats", () => {
       const doc = {
-        labelFormats: gLabelFormats
+        labelFormats
       } as label.IjsPDFExt;
 
-      const expected: label.ILabelDescription[] = gLabelFormats.map((lf) => lf.descriptionPDF);
+      const expected: label.ILabelDescription[] = labelFormats.map((lf) => lf.descriptionPDF);
 
       const actual = label.getAvailableLabelFormats(doc);
 
@@ -229,7 +274,7 @@ describe("Module `label`: label-generating PDF routines", () => {
       spyOn(fakeDoc, "setFont");
       spyOn(fakeDoc, "setLanguage");
 
-      const labelFormatsJson = JSON.stringify(gLabelFormats);
+      const labelFormatsJson = JSON.stringify(labelFormats);
       spyOn(window, "fetch").and.returnValue(Promise.resolve(new Response(labelFormatsJson)));
 
       label.initPDFLabelDoc(fakeDoc, "")
@@ -257,7 +302,7 @@ describe("Module `label`: label-generating PDF routines", () => {
       spyOn(fakeDoc, "setFont");
       const setLanguage = spyOn(fakeDoc, "setLanguage");
 
-      const labelFormatsJson = JSON.stringify(gLabelFormats);
+      const labelFormatsJson = JSON.stringify(labelFormats);
       spyOn(window, "fetch").and.returnValue(Promise.resolve(new Response(labelFormatsJson)));
 
       label.initPDFLabelDoc(fakeDoc, "")
@@ -276,7 +321,7 @@ describe("Module `label`: label-generating PDF routines", () => {
   describe("loadLabelFormats", () => {
 
     it("loads and parses the label formats file", done => {
-      const labelFormatsJson = JSON.stringify(gLabelFormats);
+      const labelFormatsJson = JSON.stringify(labelFormats);
       spyOn(window, "fetch").and.returnValue(Promise.resolve(new Response(labelFormatsJson)));
 
       label.loadLabelFormats("")
@@ -294,88 +339,3 @@ describe("Module `label`: label-generating PDF routines", () => {
   });
 
 });
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-const gLabelFormats = [{
-  descriptionPDF: {
-    labelWidthDisplay: "1",
-    labelHeightDisplay: "2",
-    labelsPerPageDisplay: "3",
-    averyPartNumber: "A"
-  },
-  labelSpec: {
-    type: "1",
-    pageDimensions: {
-      width: 1,
-      height: 1,
-      leftMargin: 1,
-      rightMargin: 1,
-      topMargin: 1,
-      bottomMargin: 1
-    },
-    numLabelsAcross: 1,
-    numLabelsDown: 1,
-    labelWidth: 1,
-    labelHeight: 1,
-    horizGapIn: 1,
-    vertGapIn: 1,
-    labelPadding: 1,
-    fontSizePx: 1,
-    maxNumLabelLines: 1
-  }
-}, {
-  descriptionPDF: {
-    labelWidthDisplay: "10",
-    labelHeightDisplay: "20",
-    labelsPerPageDisplay: "30",
-    averyPartNumber: "B"
-  },
-  labelSpec: {
-    type: "10",
-    pageDimensions: {
-      width: 10,
-      height: 10,
-      leftMargin: 10,
-      rightMargin: 10,
-      topMargin: 10,
-      bottomMargin: 10
-    },
-    numLabelsAcross: 10,
-    numLabelsDown: 10,
-    labelWidth: 10,
-    labelHeight: 10,
-    horizGapIn: 10,
-    vertGapIn: 10,
-    labelPadding: 10,
-    fontSizePx: 10,
-    maxNumLabelLines: 10
-  }
-}, {
-  descriptionPDF: {
-    labelWidthDisplay: "100",
-    labelHeightDisplay: "200",
-    labelsPerPageDisplay: "300",
-    averyPartNumber: "C"
-  },
-  labelSpec: {
-    type: "100",
-    pageDimensions: {
-      width: 100,
-      height: 100,
-      leftMargin: 100,
-      rightMargin: 100,
-      topMargin: 100,
-      bottomMargin: 100
-    },
-    numLabelsAcross: 100,
-    numLabelsDown: 100,
-    labelWidth: 100,
-    labelHeight: 100,
-    horizGapIn: 100,
-    vertGapIn: 100,
-    labelPadding: 100,
-    fontSizePx: 100,
-    maxNumLabelLines: 100
-  }
-}] as label.ILabel[];
