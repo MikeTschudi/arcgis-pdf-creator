@@ -144,7 +144,7 @@ export type IAddLabelsToDocProgressCallback = (
 //--------------------------------------------------------------------------------------------------------------------//
 
 /**
- * Add labels to a PDF doc.
+ * Add labels to a PDF doc, starting at the beginning of the current PDF doc page.
  *
  * @param {object} doc jsPDF document
  * @param labels Array of labels; each label consists of one or more line strings
@@ -179,13 +179,14 @@ export function addLabelsToDoc(
 
     // Draw
     let currentPageNum = startingPageNum;
+
     for (let iLabel = 0; iLabel < labels.length; iLabel++) {
       let labelLines = labels[iLabel];
       if (!Array.isArray(labelLines) || labelLines.length === 0) {
         continue;
       }
       if (progressCallback) {
-        progressCallback(iLabel / labels.length);
+        progressCallback(iLabel / labels.length * 100);
       }
 
       // Are we at the beginning of a page or column?
