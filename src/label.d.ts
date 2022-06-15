@@ -130,6 +130,27 @@ percentDone: number) => void;
  * @returns Promise which, when resolved, returns the 1-based page number of the last page containing labels
  */
 export declare function addLabelsToDoc(doc: jspdf.jsPDF, labels: string[][], labelSpec: ILabelSpec, startingPageNum: number, subsequentPageOptions?: pdf.IPDFOptions, progressCallback?: IAddLabelsToDocProgressCallback): Promise<number>;
+/**
+ * Calculates the baseline position of the first line of text in a label.
+ *
+ * @param labelTop Offset from top of document to top of label
+ * @param labelHeight Height of each label in doc units
+ * @param numLabelLines Number of lines to be drawn in the label
+ * @param fontHeight Height of text in doc units
+ * @param verticalFontGap Spacing between lines of text in doc units
+ * @returns Baseline position
+ */
+export declare function calculateLabelFirstLineBase(labelTop: number, labelHeight: number, numLabelLines: number, fontHeight: number, verticalFontGap: number): number;
+/**
+ * Calculates the offset from the page top to the top of a label in a specified row.
+ *
+ * @param topMargin Offset from top of document to top of drawing area
+ * @param row Zero-based row number
+ * @param labelHeight Height of each label in doc units
+ * @param vertGapIn Space between rows of labels in doc units
+ * @return Offset to top of label
+ */
+export declare function calculateLabelTop(topMargin: number, row: number, labelHeight: number, vertGapIn: number): number;
 export declare function drawLabelGuidelines(doc: jspdf.jsPDF, labelSpec: ILabelSpec, labelBoundaryLinesProperties?: grid.ILineProperties, measurementLinesProperties?: grid.IMeasurementLineProperties): void;
 /**
  * Returns the UI descriptions of the label formats known to the extended jsPDF `doc` object.

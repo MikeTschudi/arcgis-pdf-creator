@@ -173,21 +173,24 @@ export function addLabelsToDoc(
 
     // Prep the drawing environment
     // Compute the font height in page units of the font and jsPDF's text line gap height
-    const fontHeightIn = labelSpec.fontSizePx / doc.internal.scaleFactor;
-    const verticalFontGapIn = 0.20 * fontHeightIn;
+    const fontHeight = labelSpec.fontSizePx / doc.internal.scaleFactor;
+    const verticalFontGap = 0.20 * fontHeight;
     doc.setFontSize(labelSpec.fontSizePx);
+
+    // Screen out empty labels
+    const screenedLabels = labels.filter(
+      (label) => Array.isArray(label) && label.length > 0
+    );
 
     // Draw
     let currentPageNum = startingPageNum;
 
-    for (let iLabel = 0; iLabel < labels.length; iLabel++) {
-      let labelLines = labels[iLabel];
-      if (!Array.isArray(labelLines) || labelLines.length === 0) {
-        continue;
-      }
+    for (let iLabel = 0; iLabel < screenedLabels.length; iLabel++) {
       if (progressCallback) {
-        progressCallback(iLabel / labels.length * 100);
+        progressCallback(Math.round(iLabel / screenedLabels.length * 100));
       }
+
+      let labelLines = screenedLabels[iLabel];
 
       // Are we at the beginning of a page or column?
       if (iLabel % labelsPerPageDisplay === 0) {
@@ -211,25 +214,67 @@ export function addLabelsToDoc(
         row = 0;
       }
 
-      currentLabelTop = labelSpec.pageDimensions.topMargin + (row++ * (labelSpec.labelHeight + labelSpec.vertGapIn));
-
       // Draw the label
       // Don't use more lines than the label can hold; clip overlong lines; append ellipses to clipped lines
       labelLines = clipOverlongLines(doc, labelLines.slice(0, labelSpec.maxNumLabelLines), maxLabelTextWidth);
 
       // Draw label; text origin is on bottom, and we move it up based on the number of lines so that it is
       // vertically centered in label
-      const labelVerticalMidpoint = currentLabelTop + (labelSpec.labelHeight / 2);
-      doc.text(labelLines,
+      currentLabelTop = calculateLabelTop(labelSpec.pageDimensions.topMargin, row++, labelSpec.labelHeight, labelSpec.vertGapIn);
+      doc.text(
+        labelLines,
         currentLabelLeft + labelSpec.labelPadding,
-        labelVerticalMidpoint +
-        (2 - labelLines.length) / 2 * fontHeightIn +
-        (1 - labelLines.length) / 2 * verticalFontGapIn
+        calculateLabelFirstLineBase(currentLabelTop, labelSpec.labelHeight, labelLines.length, fontHeight, verticalFontGap)
       );
+    }
+
+    if (progressCallback) {
+      progressCallback(100);
     }
 
     resolve(currentPageNum);
   });
+}
+
+/**
+ * Calculates the baseline position of the first line of text in a label.
+ *
+ * @param labelTop Offset from top of document to top of label
+ * @param labelHeight Height of each label in doc units
+ * @param numLabelLines Number of lines to be drawn in the label
+ * @param fontHeight Height of text in doc units
+ * @param verticalFontGap Spacing between lines of text in doc units
+ * @returns Baseline position
+ */
+export function calculateLabelFirstLineBase(
+  labelTop: number,
+  labelHeight: number,
+  numLabelLines: number,
+  fontHeight: number,
+  verticalFontGap: number
+): number {
+  const labelVerticalMidpoint = labelTop + (labelHeight / 2);
+  return labelVerticalMidpoint +
+    (2 - numLabelLines) / 2 * fontHeight +
+    (1 - numLabelLines) / 2 * verticalFontGap;
+}
+
+/**
+ * Calculates the offset from the page top to the top of a label in a specified row.
+ *
+ * @param topMargin Offset from top of document to top of drawing area
+ * @param row Zero-based row number
+ * @param labelHeight Height of each label in doc units
+ * @param vertGapIn Space between rows of labels in doc units
+ * @return Offset to top of label
+ */
+export function calculateLabelTop(
+  topMargin: number,
+  row: number,
+  labelHeight: number,
+  vertGapIn: number
+): number {
+  return topMargin + (row * (labelHeight + vertGapIn));
 }
 
 export function drawLabelGuidelines(

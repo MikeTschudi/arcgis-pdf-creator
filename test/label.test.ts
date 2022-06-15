@@ -32,9 +32,39 @@ describe("Module `label`: label-generating PDF routines", () => {
         getStringUnitWidth: (text: string) => { return text.length; },
         setFontSize: (size: number) => {},
         text: (text: string[], x: number, y: number) => {},
-        internal: {
-          scaleFactor: 1
+        internal: { scaleFactor: 72 }
+      });
+      const labels = [];
+      const labelSpec = labelFormats[0].labelSpec;  // 30 labels per page
+      const startingPageNum = 1;
+
+      const addPageSpy = spyOn(fakeDoc, "addPage");
+      const setFontSizeSpy = spyOn(fakeDoc, "setFontSize");
+      const textSpy = spyOn(fakeDoc, "text");
+
+      label.addLabelsToDoc(fakeDoc, labels, labelSpec, startingPageNum)
+      .then(
+        (currentPageNum: number) => {
+          expect(currentPageNum).withContext("currentPageNum").toEqual(startingPageNum);
+          expect(addPageSpy.calls.count()).withContext("addPage calls").toEqual(0);
+          expect(setFontSizeSpy.calls.count()).withContext("setFontSize calls").toEqual(1);
+          expect(textSpy.calls.count()).withContext("text calls").toEqual(0);
+          done();
+        },
+        () => {
+          done.fail();
         }
+      );
+    });
+
+    it("generates labels and reports progress", done => {
+      const fakeDoc = Object.assign({
+        addPage: (format: string, orientation: string) => {},
+        getFontSize: () => { return 1; },
+        getStringUnitWidth: (text: string) => { return text.length; },
+        setFontSize: (size: number) => {},
+        text: (text: string[], x: number, y: number) => {},
+        internal: { scaleFactor: 72 }
       });
       const labels = [[
         "abc",
@@ -42,21 +72,158 @@ describe("Module `label`: label-generating PDF routines", () => {
         ], [
         "ghi",
         "jkl"
+        ], [
+        "mno",
+        "pqr"
       ]];
-      const labelSpec = labelFormats[0].labelSpec;
+      const labelSpec = labelFormats[0].labelSpec;  // 30 labels per page
       const startingPageNum = 4;
 
       const addPageSpy = spyOn(fakeDoc, "addPage");
       const setFontSizeSpy = spyOn(fakeDoc, "setFontSize");
       const textSpy = spyOn(fakeDoc, "text");
 
-      label.addLabelsToDoc(fakeDoc, labels, labelSpec, startingPageNum, {}, (pct) => { console.log(pct + "%"); })
+      const reportedPcts: number[] = [];
+      const recordPcts = (pct) => { reportedPcts.push(pct); };
+      const expectedPcts = [0, 33, 67, 100];
+
+      label.addLabelsToDoc(fakeDoc, labels, labelSpec, startingPageNum, undefined, recordPcts)
       .then(
         (currentPageNum: number) => {
-          expect(currentPageNum).toEqual(4);
-          expect(addPageSpy.calls.count()).toEqual(0);
-          expect(setFontSizeSpy.calls.count()).toEqual(1);
-          expect(textSpy.calls.count()).toEqual(2);
+        expect(currentPageNum).withContext("currentPageNum").toEqual(startingPageNum);
+          expect(addPageSpy.calls.count()).withContext("addPage calls").toEqual(0);
+          expect(setFontSizeSpy.calls.count()).withContext("setFontSize calls").toEqual(1);
+          expect(textSpy.calls.count()).withContext("text calls").toEqual(3);
+          expect(reportedPcts).withContext("reported pcts").toEqual(expectedPcts);
+
+          for (let row: number = 0; row < labels.length; ++row) {
+            const { labelTextLeft, labelFirstLineBase } =
+              calculateLabelPosition(fakeDoc.internal.scaleFactor, labelSpec, row, 0, labels[row].length);
+            expect(textSpy.calls.argsFor(row)[1]).withContext("label " + row + " left").toEqual(labelTextLeft);
+            expect(textSpy.calls.argsFor(row)[2]).withContext("label " + row + " first line base").toEqual(labelFirstLineBase);
+          }
+
+          done();
+        },
+        () => {
+          done.fail();
+        }
+      );
+    });
+
+    it("generates labels, skipping empty ones", done => {
+      const fakeDoc = Object.assign({
+        addPage: (format: string, orientation: string) => {},
+        getFontSize: () => { return 1; },
+        getStringUnitWidth: (text: string) => { return text.length; },
+        setFontSize: (size: number) => {},
+        text: (text: string[], x: number, y: number) => {},
+        internal: { scaleFactor: 72 }
+      });
+      const labels = [[
+        "abc",
+        "def"
+        ], [
+        ], [
+        "mno",
+        "pqr"
+      ]];
+      const labelSpec = labelFormats[0].labelSpec;  // 30 labels per page
+      const startingPageNum = 4;
+
+      const addPageSpy = spyOn(fakeDoc, "addPage");
+      const setFontSizeSpy = spyOn(fakeDoc, "setFontSize");
+      const textSpy = spyOn(fakeDoc, "text");
+
+      const reportedPcts: number[] = [];
+      const recordPcts = (pct) => { reportedPcts.push(pct); };
+      const expectedPcts = [0, 50, 100];
+
+      label.addLabelsToDoc(fakeDoc, labels, labelSpec, startingPageNum, undefined, recordPcts)
+      .then(
+        (currentPageNum: number) => {
+        expect(currentPageNum).withContext("currentPageNum").toEqual(startingPageNum);
+          expect(addPageSpy.calls.count()).withContext("addPage calls").toEqual(0);
+          expect(setFontSizeSpy.calls.count()).withContext("setFontSize calls").toEqual(1);
+          expect(textSpy.calls.count()).withContext("text calls").toEqual(2);
+          expect(reportedPcts).withContext("reported pcts").toEqual(expectedPcts);
+
+          {
+            let { labelTextLeft, labelFirstLineBase } =
+              calculateLabelPosition(fakeDoc.internal.scaleFactor, labelSpec, 0, 0, labels[0].length);
+            expect(textSpy.calls.argsFor(0)[1]).withContext("label 0 left").toEqual(labelTextLeft);
+            expect(textSpy.calls.argsFor(0)[2]).withContext("label 0 first line base").toEqual(labelFirstLineBase);
+          }
+          {
+            let { labelTextLeft, labelFirstLineBase } =
+              calculateLabelPosition(fakeDoc.internal.scaleFactor, labelSpec, 1, 0, labels[2].length);
+            expect(textSpy.calls.argsFor(1)[1]).withContext("label 2 left").toEqual(labelTextLeft);
+            expect(textSpy.calls.argsFor(1)[2]).withContext("label 2 first line base").toEqual(labelFirstLineBase);
+          }
+
+          done();
+        },
+        () => {
+          done.fail();
+        }
+      );
+    });
+
+    it("generates multiple columns and pages of labels as needed", done => {
+      const fakeDoc = Object.assign({
+        addPage: (format: string, orientation: string) => {},
+        getFontSize: () => { return 1; },
+        getStringUnitWidth: (text: string) => { return text.length; },
+        setFontSize: (size: number) => {},
+        text: (text: string[], x: number, y: number) => {},
+        internal: { scaleFactor: 72 }
+      });
+      const labels = [[
+        "abc",
+        "def"
+        ], [
+        "ghi",
+        "jkl"
+        ], [
+        "mno",
+        "pqr"
+        ], [
+        "stu",
+        "vwx"
+        ], [
+        "yz0",
+        "123"
+        ], [
+        "456",
+        "789"
+        ], [
+        "a1a",
+        "b2b"
+      ]];
+      const labelSpec = labelFormats[4].labelSpec;  // 6 labels per page
+      const startingPageNum = 2;
+
+      const addPageSpy = spyOn(fakeDoc, "addPage");
+      const setFontSizeSpy = spyOn(fakeDoc, "setFontSize");
+      const textSpy = spyOn(fakeDoc, "text");
+
+      label.addLabelsToDoc(fakeDoc, labels, labelSpec, startingPageNum)
+      .then(
+        (currentPageNum: number) => {
+        expect(currentPageNum).withContext("currentPageNum").toEqual(startingPageNum + 1);
+          expect(addPageSpy.calls.count()).withContext("addPage calls").toEqual(1);
+          expect(setFontSizeSpy.calls.count()).withContext("setFontSize calls").toEqual(1);
+          expect(textSpy.calls.count()).withContext("text calls").toEqual(7);
+
+          for (let labelNum: number = 0; labelNum < labels.length; ++labelNum) {
+            const row = labelNum % labelSpec.numLabelsDown;
+            const col = Math.floor(labelNum / labelSpec.numLabelsDown) % labelSpec.numLabelsAcross;
+            const { labelTextLeft, labelFirstLineBase } =
+              calculateLabelPosition(fakeDoc.internal.scaleFactor, labelSpec, row, col, labels[labelNum].length);
+            expect(textSpy.calls.argsFor(labelNum)[1]).withContext("label " + row + "," + col + " left").toEqual(labelTextLeft);
+            expect(textSpy.calls.argsFor(labelNum)[2]).withContext("label " + row + "," + col + " first line base").toEqual(labelFirstLineBase);
+          }
+
           done();
         },
         () => {
@@ -83,9 +250,7 @@ describe("Module `label`: label-generating PDF routines", () => {
       const fakeDoc = Object.assign({
         getFontSize: () => { return 1; },
         getStringUnitWidth: (text: string) => { return text.length; },
-        internal: {
-          scaleFactor: 1
-        }
+        internal: { scaleFactor: 72 }
       });
       const textLines = [
         "abc",
@@ -107,9 +272,7 @@ describe("Module `label`: label-generating PDF routines", () => {
       const fakeDoc = Object.assign({
         getFontSize: () => { return 1; },
         getStringUnitWidth: (text: string) => { return text.length; },
-        internal: {
-          scaleFactor: 1
-        }
+        internal: { scaleFactor: 1 }
       });
       const textLines = [
         "abc",
@@ -244,9 +407,7 @@ describe("Module `label`: label-generating PDF routines", () => {
       const fakeDoc = Object.assign({
         getFontSize: () => {},
         getStringUnitWidth: (text: string) => {},
-        internal: {
-          scaleFactor: 5
-        }
+        internal: { scaleFactor: 5 }
       });
       const getFontSizeSpy = spyOn(fakeDoc, "getFontSize").and.returnValue(15);
       expect(fakeDoc.getFontSize()).toEqual(15);
@@ -339,3 +500,42 @@ describe("Module `label`: label-generating PDF routines", () => {
   });
 
 });
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+interface ILabelPos {
+  labelTextLeft: number,
+  labelFirstLineBase: number
+}
+
+function calculateLabelPosition(
+  scaleFactor: number,
+  labelSpec: label.ILabelSpec,
+  row: number,
+  col: number,
+  numLinesInLabel: number
+): ILabelPos {
+  const fontHeight = labelSpec.fontSizePx / scaleFactor;
+  const verticalFontGap = 0.20 * fontHeight;
+
+  const labelTextLeft =
+    labelSpec.pageDimensions.leftMargin +
+    (col * (labelSpec.labelWidth + labelSpec.horizGapIn)) +
+    labelSpec.labelPadding;
+
+  const labelFirstLineBase =
+    label.calculateLabelFirstLineBase(
+      label.calculateLabelTop(
+        labelSpec.pageDimensions.topMargin,
+        row,
+        labelSpec.labelHeight,
+        labelSpec.vertGapIn
+      ),
+      labelSpec.labelHeight,
+      numLinesInLabel,
+      fontHeight,
+      verticalFontGap
+    );
+
+  return { labelTextLeft, labelFirstLineBase };
+}
