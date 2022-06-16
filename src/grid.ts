@@ -77,8 +77,8 @@ export function drawGridBoxes(
   const savedLineProperties = setLineProperties(doc, lineProperties);
 
   // Draw the set of boxes
-  for (let i = 0; i < numAcross; ++i) {
-    for (let j = 0; j < numDown; ++j) {
+  for (let j = 0; j < numDown; ++j) {
+    for (let i = 0; i < numAcross; ++i) {
       doc.rect(x0 + i * (width + horizGap), y0 + j * (height + vertGap), width, height);
     }
   }
