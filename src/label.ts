@@ -303,16 +303,7 @@ export function drawLabelGuidelines(
   if (measurementLinesProperties !== null) {
     grid.drawMeasurementLines(
       doc,
-      {
-        width: labelSpec.pageDimensions.width -
-          labelSpec.pageDimensions.leftMargin - labelSpec.pageDimensions.rightMargin,
-        height: labelSpec.pageDimensions.height -
-          labelSpec.pageDimensions.topMargin - labelSpec.pageDimensions.bottomMargin,
-        leftMargin: labelSpec.pageDimensions.leftMargin,
-        rightMargin: 0,
-        topMargin: labelSpec.pageDimensions.topMargin,
-        bottomMargin: 0
-      },
+      labelSpec.pageDimensions,
       measurementLinesProperties
     );
   }
