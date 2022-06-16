@@ -138,20 +138,20 @@ describe("Module `grid`: grid-generating PDF routines", () => {
 
       let call = 0;
       for (; call < numTicksAcrossPage; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for top vertical ticks are the same").toEqual(0);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for top vertical ticks are the same").toBeCloseTo(tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for top vertical ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for top vertical ticks are the same").toBeCloseTo(tickLength);
       }
       for (; call < 2 * numTicksAcrossPage; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for bottom vertical ticks are the same").toEqual(0);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for bottom vertical ticks are the same").toBeCloseTo(-tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for bottom vertical ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for bottom vertical ticks are the same").toBeCloseTo(-tickLength);
       }
       for (; call < 2 * numTicksAcrossPage + numTicksDownPage; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(tickLength);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
       }
       for (; call < expectedNumberOfTicks; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(-tickLength);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(-tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
       }
 
       expect(rectSpy.calls.count()).withContext("rectSpy calls").toEqual(1);
@@ -195,20 +195,20 @@ describe("Module `grid`: grid-generating PDF routines", () => {
 
       let call = 0;
       for (; call < numTicksAcrossPage; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for top vertical ticks are the same").toEqual(0);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for top vertical ticks are the same").toBeCloseTo(tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for top vertical ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for top vertical ticks are the same").toBeCloseTo(tickLength);
       }
       for (; call < 2 * numTicksAcrossPage; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for bottom vertical ticks are the same").toEqual(0);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for bottom vertical ticks are the same").toBeCloseTo(-tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for bottom vertical ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for bottom vertical ticks are the same").toBeCloseTo(-tickLength);
       }
       for (; call < 2 * numTicksAcrossPage + numTicksDownPage; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(tickLength);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
       }
       for (; call < expectedNumberOfTicks; call++) {
-        expect(linesSpy.calls.argsFor(call)[0][0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(-tickLength);
-        expect(linesSpy.calls.argsFor(call)[0][0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][0]).withContext("all vectors for left horizontal ticks are the same").toBeCloseTo(-tickLength);
+        expect((linesSpy.calls.argsFor(call)[0] as any)[0][1]).withContext("all vectors for left horizontal ticks are the same").toEqual(0);
       }
 
       expect(rectSpy.calls.count()).withContext("rectSpy calls").toEqual(1);
@@ -268,7 +268,7 @@ describe("Module `grid`: grid-generating PDF routines", () => {
       for (let call = 0; call < expectedNumberOfTicks; call++) {
         expect(linesSpy.calls.argsFor(call)[1]).withContext("x origins vary").toEqual(xLeftTick + (call * tickInterval));
         expect(linesSpy.calls.argsFor(call)[2]).withContext("all y origins are the same").toEqual(yTickTop);
-        expect(linesSpy.calls.argsFor(call)[0]).withContext("all vectors are the same").toEqual([ [ 0, tickLength ] ]);
+        expect((linesSpy.calls.argsFor(call)[0] as any)).withContext("all vectors are the same").toEqual([ [ 0, tickLength ] ]);
       }
     });
 
