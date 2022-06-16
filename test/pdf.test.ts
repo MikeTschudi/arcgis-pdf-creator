@@ -94,7 +94,7 @@ describe("Module `pdf`: general PDF helper routines", () => {
       const setLanguage = spyOn(fakeDoc, "setLanguage");
       const setR2LSpy = spyOn(fakeDoc, "setR2L");
 
-      pdf.loadLanguageFontFile(fakeDoc, "", "fr")
+      pdf.loadLanguageFontFile(fakeDoc, "")
       .then(
         (ok) => {
           expect(fetchSpy.calls.count()).withContext("should not call fetch").toEqual(0);
@@ -110,7 +110,7 @@ describe("Module `pdf`: general PDF helper routines", () => {
           expect(setFontSpy.calls.argsFor(0)[0]).withContext("check setFont's fontName arg").toEqual("0b7681dc140844ee9f409bdac249fbf0-general");
 
           expect(setLanguage.calls.count()).withContext("should call setLanguage once").toEqual(1);
-          expect(setLanguage.calls.argsFor(0)[0]).withContext("check setLanguage's langCode arg").toEqual("fr");
+          expect(setLanguage.calls.argsFor(0)[0]).withContext("check setLanguage's langCode arg").toEqual("en-US");
 
           expect(setR2LSpy.calls.count()).withContext("should not call setR2L").toEqual(0);
 
